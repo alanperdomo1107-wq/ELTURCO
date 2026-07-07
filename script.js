@@ -6,6 +6,40 @@
    ========================================================= */
 'use strict';
 
+/* ---------------------------------------------------------
+   CONFIGURACIÓN DE EMAILJS (envío de emails sin backend propio)
+   ---------------------------------------------------------
+   Se usa únicamente en el formulario de contacto. Completá los
+   valores con los datos de tu cuenta en
+   https://dashboard.emailjs.com
+   --------------------------------------------------------- */
+const EMAILJS_PUBLIC_KEY = 'iEk9UF15MzakJwDQ2';
+const EMAILJS_SERVICE_ID = 'service_uwz4hxs';
+const EMAILJS_CONTACT_TEMPLATE_ID = 'template_firq6xs';
+
+const isEmailjsConfigured = () =>
+  typeof window.emailjs !== 'undefined' &&
+  !EMAILJS_PUBLIC_KEY.startsWith('TU_') &&
+  !EMAILJS_SERVICE_ID.startsWith('TU_');
+
+if (typeof window.emailjs !== 'undefined' && !EMAILJS_PUBLIC_KEY.startsWith('TU_')) {
+  window.emailjs.init(EMAILJS_PUBLIC_KEY);
+}
+
+// Envía un email por EmailJS. Nunca frena el flujo del formulario si
+// falla: sólo se registra el error en consola y se avisa en consola.
+async function sendEmailNotification(templateId, params) {
+  if (!isEmailjsConfigured() || templateId.startsWith('TU_')) {
+    console.warn('EmailJS no está configurado todavía: no se envió ningún email.');
+    return;
+  }
+  try {
+    await window.emailjs.send(EMAILJS_SERVICE_ID, templateId, params);
+  } catch (error) {
+    console.error('No se pudo enviar el email de notificación:', error);
+  }
+}
+
 /* ---------- Utilidades ---------- */
 const $ = (selector, scope = document) => scope.querySelector(selector);
 const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
@@ -525,7 +559,7 @@ const Agenda = (function initAgenda() {
     return '';
   }
 
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
     statusEl.textContent = '';
     statusEl.removeAttribute('data-state');
@@ -544,12 +578,23 @@ const Agenda = (function initAgenda() {
       return;
     }
 
-    // No hay backend conectado en esta demo: se confirma en pantalla.
-    // En producción, este bloque debería enviar los datos a una API propia
-    // (por ejemplo vía fetch a un endpoint del servidor) sin exponer
-    // credenciales en el frontend.
     const nameValue = nameInput.value.trim();
+    const emailValue = emailInput.value.trim();
+    const messageValue = messageInput.value.trim();
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+    statusEl.textContent = 'Enviando tu mensaje...';
+
+    await sendEmailNotification(EMAILJS_CONTACT_TEMPLATE_ID, {
+      client_name: nameValue,
+      client_email: emailValue,
+      message: messageValue,
+    });
+
+    if (submitBtn) submitBtn.disabled = false;
     statusEl.textContent = `¡Gracias, ${nameValue}! Recibimos tu mensaje y te vamos a responder a la brevedad.`;
+    statusEl.removeAttribute('data-state');
     form.reset();
   });
 })();
