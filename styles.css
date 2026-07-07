@@ -1,12 +1,5 @@
-/* =========================================================
-   EL TURCO — Cancha de Fútbol 5
-   Sistema de diseño: "Estadio nocturno"
-   Paleta: negro-noche + verde de césped + ámbar de reflector
-   ========================================================= */
 
-/* ---------- 1. Tokens / variables ---------- */
 :root {
-  /* Colores base */
   --night: #0b140f;
   --night-2: #12201a;
   --night-3: #182b22;
@@ -24,12 +17,10 @@
   --muted: #9fb0a5;
   --danger: #e5484d;
 
-  /* Tipografía */
   --font-display: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
   --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 
-  /* Layout */
   --container: 1160px;
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -38,7 +29,6 @@
   --shadow-card: 0 18px 40px -20px rgba(0, 0, 0, 0.6);
 }
 
-/* ---------- 2. Reset básico ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 
@@ -60,7 +50,6 @@ a { color: inherit; text-decoration: none; }
 button { font: inherit; cursor: pointer; }
 input, select, textarea { font: inherit; color: inherit; }
 
-/* Respeta la preferencia de movimiento reducido */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
@@ -70,7 +59,6 @@ input, select, textarea { font: inherit; color: inherit; }
   }
 }
 
-/* Accesibilidad: foco visible siempre */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
@@ -105,7 +93,6 @@ textarea:focus-visible,
 }
 .skip-link:focus { top: 1rem; }
 
-/* ---------- 3. Layout utilitario ---------- */
 .container {
   width: 100%;
   max-width: var(--container);
@@ -142,7 +129,6 @@ textarea:focus-visible,
   font-size: 1.02rem;
 }
 
-/* ---------- 4. Botones ---------- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -174,7 +160,6 @@ textarea:focus-visible,
 
 .btn-block { width: 100%; }
 
-/* ---------- 5. Encabezado ---------- */
 .site-header {
   position: sticky;
   top: 0;
@@ -338,7 +323,6 @@ textarea:focus-visible,
   color: var(--flood-soft);
 }
 
-/* ---------- 7. Servicios ---------- */
 .services-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -372,7 +356,6 @@ textarea:focus-visible,
 }
 .service-card p { color: var(--muted); font-size: 0.95rem; }
 
-/* ---------- 8. Sobre nosotros ---------- */
 .about-grid {
   display: grid;
   grid-template-columns: 1fr 1.1fr;
@@ -433,7 +416,6 @@ textarea:focus-visible,
   flex-shrink: 0;
 }
 
-/* ---------- 9. Agenda / Tablero de reservas (elemento distintivo) ---------- */
 .scoreboard {
   background: var(--night-2);
   border: 1px solid var(--line);
@@ -520,8 +502,6 @@ textarea:focus-visible,
 .slot-tile[disabled] .slot-dot { background: var(--danger); }
 .slot-tile[disabled] .slot-time { text-decoration: line-through; }
 
-/* Horario de hoy que ya pasó: más apagado que "ocupado", sin el
-   punto rojo, para no confundirlo con un turno reservado por otro. */
 .slot-tile--past {
   opacity: 0.35;
 }
@@ -557,7 +537,6 @@ textarea:focus-visible,
 .dot-selected { background: var(--flood); }
 .dot-taken { background: var(--danger); }
 
-/* Resumen + formulario de reserva */
 .booking-form {
   border-top: 1px solid var(--line);
   padding-top: 1.5rem;
@@ -623,7 +602,6 @@ textarea:focus-visible,
 }
 .booking-status[data-state="error"] { color: var(--danger); }
 
-/* ---------- 10. Contacto ---------- */
 .contact-grid {
   display: grid;
   grid-template-columns: 1fr 1.1fr;
@@ -653,7 +631,6 @@ textarea:focus-visible,
   box-shadow: var(--shadow-card);
 }
 
-/* ---------- 11. Pie de página ---------- */
 .site-footer {
   background: var(--night-2);
   border-top: 1px solid var(--line);
@@ -689,9 +666,7 @@ textarea:focus-visible,
   font-size: 0.85rem;
 }
 
-/* =========================================================
-   12. Responsive
-   ========================================================= */
+
 @media (max-width: 900px) {
   .about-grid, .contact-grid { grid-template-columns: 1fr; }
   .about-visual { order: -1; }
@@ -726,9 +701,7 @@ textarea:focus-visible,
   .footer-inner { grid-template-columns: 1fr; }
 }
 
-/* =========================================================
-   PANEL DE ADMINISTRACIÓN (admin.html / admin.js)
-   ========================================================= */
+
 .admin-body {
   background: var(--night);
   color: var(--chalk);

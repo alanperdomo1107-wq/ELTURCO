@@ -1,18 +1,7 @@
-/* =========================================================
-   EL TURCO — script.js
-   Sin librerías externas. Todo el DOM dinámico se arma con
-   textContent / createElement para evitar XSS (no se usa
-   innerHTML con datos que puedan venir de un usuario).
-   ========================================================= */
+
 'use strict';
 
-/* ---------------------------------------------------------
-   CONFIGURACIÓN DE EMAILJS (envío de emails sin backend propio)
-   ---------------------------------------------------------
-   Se usa únicamente en el formulario de contacto. Completá los
-   valores con los datos de tu cuenta en
-   https://dashboard.emailjs.com
-   --------------------------------------------------------- */
+
 const EMAILJS_PUBLIC_KEY = 'iEk9UF15MzakJwDQ2';
 const EMAILJS_SERVICE_ID = 'service_56p4zwe';
 const EMAILJS_CONTACT_TEMPLATE_ID = 'template_firq6xs';
@@ -26,8 +15,7 @@ if (typeof window.emailjs !== 'undefined' && !EMAILJS_PUBLIC_KEY.startsWith('TU_
   window.emailjs.init(EMAILJS_PUBLIC_KEY);
 }
 
-// Envía un email por EmailJS. Nunca frena el flujo del formulario si
-// falla: sólo se registra el error en consola y se avisa en consola.
+
 async function sendEmailNotification(templateId, params) {
   if (!isEmailjsConfigured() || templateId.startsWith('TU_')) {
     console.warn('EmailJS no está configurado todavía: no se envió ningún email.');
@@ -40,13 +28,10 @@ async function sendEmailNotification(templateId, params) {
   }
 }
 
-/* ---------- Utilidades ---------- */
 const $ = (selector, scope = document) => scope.querySelector(selector);
 const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
 
-/* ---------------------------------------------------------
-   1. NAVEGACIÓN (menú móvil + resaltado de enlace activo)
-   --------------------------------------------------------- */
+
 (function initNav() {
   const toggle = $('#navToggle');
   const nav = $('#primaryNav');
@@ -58,7 +43,6 @@ const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(sel
       toggle.setAttribute('aria-expanded', String(isOpen));
     });
 
-    // Cierra el menú móvil al elegir un enlace
     $$('.nav-link, .nav-cta', nav).forEach((link) => {
       link.addEventListener('click', () => {
         nav.classList.remove('is-open');
@@ -67,14 +51,12 @@ const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(sel
     });
   }
 
-  // Sombra/blur más marcado al hacer scroll (detalle visual sutil)
   window.addEventListener('scroll', () => {
     header.style.boxShadow = window.scrollY > 8
       ? '0 8px 24px -16px rgba(0,0,0,0.6)'
       : 'none';
   }, { passive: true });
 
-  // Resalta el enlace de la sección visible (accesible, sin librerías)
   const sections = $$('main section[id]');
   const navLinks = $$('.nav-link');
   if ('IntersectionObserver' in window && sections.length) {
@@ -91,9 +73,7 @@ const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(sel
   }
 })();
 
-/* ---------------------------------------------------------
-   2. AGENDA DE TURNOS (tablero estilo estadio)
-   --------------------------------------------------------- */
+
 const Agenda = (function initAgenda() {
   const dayTabsEl = $('#dayTabs');
   const slotGridEl = $('#slotGrid');
@@ -103,20 +83,12 @@ const Agenda = (function initAgenda() {
 
   if (!dayTabsEl || !slotGridEl || !form) return null;
 
-  /* ---------------------------------------------------------
-     CONEXIÓN CON FIREBASE (Firestore, base de datos real vía SDK)
-     ---------------------------------------------------------
-     La configuración (firebaseConfig) vive en un solo lugar:
-     el archivo "firebase-config.js" (cargado antes que este script
-     en index.html). Si necesitás cambiar las credenciales, editalas
-     ahí — así el panel de administración usa siempre las mismas.
-     --------------------------------------------------------- */
+  
   let db = null;
   if (isFirebaseConfigured()) {
     db = window.firebase.firestore();
   }
 
-  // Horarios de juego disponibles (24h). Editable por el negocio.
   const HOURS = [16, 17, 18, 19, 20, 21, 22, 23];
   const DAYS_AHEAD = 7;
 
@@ -125,14 +97,12 @@ const Agenda = (function initAgenda() {
     weekday: 'long', day: 'numeric', month: 'long',
   });
 
-  // Estado en memoria, se llena con datos reales traídos de Firestore
-  // (ver loadReservedSlots). No se inventa disponibilidad.
+ 
   let selectedDateKey = null;
   let selectedHour = null;
-  const reservedByDate = new Map(); // dateKey -> Set(horas) marcadas como ocupadas
+  const reservedByDate = new Map(); 
 
   function dateKey(date) {
-    // Clave estable YYYY-MM-DD en horario local
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
@@ -143,8 +113,7 @@ const Agenda = (function initAgenda() {
     return reservedByDate.get(dKey)?.has(hour) ?? false;
   }
 
-  // Un horario de "hoy" que ya arrancó o pasó no se puede reservar.
-  // Para otros días no aplica (siempre están completos por delante).
+  
   function isPast(dKey, hour) {
     const now = new Date();
     if (dKey !== dateKey(now)) return false;
@@ -156,11 +125,6 @@ const Agenda = (function initAgenda() {
     reservedByDate.get(dKey).add(hour);
   }
 
-  // Trae de Firestore todos los horarios ya ocupados dentro del rango de
-  // días que se muestra en el tablero (hoy .. hoy + DAYS_AHEAD).
-  // Sólo lee la colección "takenSlots" (día + hora), nunca nombres ni
-  // teléfonos de otros clientes: esos quedan sólo en "reservations",
-  // que las reglas de seguridad bloquean para lectura pública.
   async function loadReservedSlots() {
     reservedByDate.clear();
     if (!isFirebaseConfigured()) {
@@ -187,15 +151,10 @@ const Agenda = (function initAgenda() {
     });
   }
 
-  // Guarda la reserva en Firestore usando una transacción: primero
-  // revisa si el horario ya tiene un documento en "takenSlots" y, si
-  // no existe, crea a la vez el registro de disponibilidad y la
-  // reserva completa. Si otra persona reservó ese mismo horario un
-  // instante antes, la transacción falla y avisamos en vez de duplicar.
+  
   async function persistReservation({ dateKeyValue, hour, name, phone, players }) {
     if (!isFirebaseConfigured()) {
-      // Sin backend configurado: seguimos funcionando en modo demo local
-      // para no romper la página, pero avisamos por consola.
+      
       console.warn('Reserva NO guardada en un backend real: falta configurar Firebase.');
       return { ok: true, conflict: false };
     }
@@ -244,7 +203,7 @@ const Agenda = (function initAgenda() {
 
   function renderDayTabs() {
     const days = buildDayList();
-    dayTabsEl.textContent = ''; // limpia de forma segura
+    dayTabsEl.textContent = ''; 
 
     days.forEach((date, index) => {
       const key = dateKey(date);

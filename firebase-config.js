@@ -1,10 +1,5 @@
 'use strict';
-/* =========================================================
-   EL TURCO — Configuración compartida de Firebase
-   ---------------------------------------------------------
-   La usan tanto script.js (sitio público) como admin.js
-   (panel de administración). Se edita en un solo lugar.
-   ========================================================= */
+
 const FIREBASE_CONFIG = {
   apiKey: 'AIzaSyANhsUB1pQA1xJ7Hgswm0SCPGCXYej3NAI',
   authDomain: 'elturco-92488.firebaseapp.com',

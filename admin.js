@@ -1,10 +1,5 @@
 'use strict';
-/* =========================================================
-   EL TURCO — admin.js
-   Panel de administración: requiere login (Firebase Authentication)
-   para ver y cancelar reservas. Mismo criterio que script.js: sin
-   innerHTML con datos dinámicos, todo con textContent/createElement.
-   ========================================================= */
+
 
 const $ = (selector, scope = document) => scope.querySelector(selector);
 
@@ -47,9 +42,9 @@ function readableDateFromKey(key) {
   const auth = window.firebase.auth();
   const db = window.firebase.firestore();
 
-  let allReservations = []; // cache en memoria de la última consulta
+  let allReservations = []; 
 
-  /* ----- Login / logout ----- */
+  
   loginForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     loginStatus.textContent = '';
@@ -89,7 +84,6 @@ function readableDateFromKey(key) {
     }
   });
 
-  /* ----- Cargar reservas ----- */
   async function loadReservations() {
     dashboardStatus.textContent = 'Cargando reservas...';
     dashboardStatus.removeAttribute('data-state');
@@ -112,7 +106,6 @@ function readableDateFromKey(key) {
     }
   }
 
-  /* ----- Dibujar la tabla ----- */
   function renderTable() {
     reservationsBody.textContent = '';
     const today = todayKey();
