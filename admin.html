@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de administración — El Turco</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="admin-body">
+
+  <header class="admin-header">
+    <h1 class="admin-title">El Turco <span>· Panel de administración</span></h1>
+    <button type="button" id="logoutBtn" class="btn btn-outline" hidden>Cerrar sesión</button>
+  </header>
+
+  <main class="admin-main">
+
+    <!-- ----- Login ----- -->
+    <section id="loginSection" class="admin-card">
+      <h2>Iniciar sesión</h2>
+      <p class="admin-hint">Ingresá con el usuario admin que creaste en Firebase Authentication.</p>
+      <form id="loginForm" class="admin-form" novalidate>
+        <div class="field">
+          <label for="adminEmail">Email</label>
+          <input type="email" id="adminEmail" name="adminEmail" required autocomplete="username">
+        </div>
+        <div class="field">
+          <label for="adminPassword">Contraseña</label>
+          <input type="password" id="adminPassword" name="adminPassword" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-flood">Entrar</button>
+        <p id="loginStatus" class="admin-status" role="alert"></p>
+      </form>
+    </section>
+
+    <!-- ----- Dashboard (oculto hasta loguearse) ----- -->
+    <section id="dashboardSection" class="admin-card" hidden>
+      <div class="admin-toolbar">
+        <h2>Reservas</h2>
+        <label class="admin-toggle">
+          <input type="checkbox" id="showPastToggle">
+          Mostrar turnos pasados
+        </label>
+        <button type="button" id="refreshBtn" class="btn btn-outline">Actualizar</button>
+      </div>
+
+      <p id="dashboardStatus" class="admin-status" role="status"></p>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Nombre</th>
+              <th>Teléfono</th>
+              <th>Jugadores</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="reservationsBody">
+            <!-- filas generadas por admin.js -->
+          </tbody>
+        </table>
+      </div>
+      <p id="emptyState" class="admin-hint" hidden>No hay reservas para mostrar.</p>
+    </section>
+
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="admin.js" defer></script>
+</body>
+</html>

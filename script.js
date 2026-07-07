@@ -106,35 +106,13 @@ const Agenda = (function initAgenda() {
   /* ---------------------------------------------------------
      CONEXIÓN CON FIREBASE (Firestore, base de datos real vía SDK)
      ---------------------------------------------------------
-     1. Andá a https://console.firebase.google.com y creá un proyecto
-        gratis (plan "Spark").
-     2. Dentro del proyecto: "Compilación" > "Firestore Database" >
-        "Crear base de datos" (modo producción, la región no importa
-        demasiado para este caso, ej. "nam5" o "southamerica-east1").
-     3. Aplicá las reglas de seguridad que te dejamos en el chat
-        (archivo firestore.rules) desde la pestaña "Reglas".
-     4. Andá a "Configuración del proyecto" (ícono de tuerca) >
-        en "Tus apps" agregá una app Web (ícono </>) y copiá el
-        objeto firebaseConfig que te muestra.
-     5. Pegalo acá abajo, reemplazando los valores de ejemplo.
+     La configuración (firebaseConfig) vive en un solo lugar:
+     el archivo "firebase-config.js" (cargado antes que este script
+     en index.html). Si necesitás cambiar las credenciales, editalas
+     ahí — así el panel de administración usa siempre las mismas.
      --------------------------------------------------------- */
-  const firebaseConfig = {
-    apiKey: 'AIzaSyANhsUB1pQA1xJ7Hgswm0SCPGCXYej3NAI',
-    authDomain: 'elturco-92488.firebaseapp.com',
-    projectId: 'elturco-92488',
-    storageBucket: 'elturco-92488.firebasestorage.app',
-    messagingSenderId: '909805366642',
-    appId: '1:909805366642:web:7ee9d528fde389fea581eb',
-  };
-
-  const isFirebaseConfigured = () =>
-    typeof window.firebase !== 'undefined' &&
-    !firebaseConfig.apiKey.startsWith('TU_') &&
-    !firebaseConfig.projectId.startsWith('TU-PROYECTO');
-
   let db = null;
   if (isFirebaseConfigured()) {
-    window.firebase.initializeApp(firebaseConfig);
     db = window.firebase.firestore();
   }
 
@@ -163,6 +141,14 @@ const Agenda = (function initAgenda() {
 
   function isTaken(dKey, hour) {
     return reservedByDate.get(dKey)?.has(hour) ?? false;
+  }
+
+  // Un horario de "hoy" que ya arrancó o pasó no se puede reservar.
+  // Para otros días no aplica (siempre están completos por delante).
+  function isPast(dKey, hour) {
+    const now = new Date();
+    if (dKey !== dateKey(now)) return false;
+    return hour <= now.getHours();
   }
 
   function markReserved(dKey, hour) {
@@ -299,11 +285,14 @@ const Agenda = (function initAgenda() {
     slotGridEl.textContent = '';
     HOURS.forEach((hour) => {
       const taken = isTaken(selectedDateKey, hour);
+      const past = isPast(selectedDateKey, hour);
+      const disabled = taken || past;
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'slot-tile';
       btn.setAttribute('aria-pressed', String(selectedHour === hour));
-      if (taken) btn.setAttribute('disabled', 'true');
+      if (disabled) btn.setAttribute('disabled', 'true');
+      if (past && !taken) btn.classList.add('slot-tile--past');
 
       const time = document.createElement('span');
       time.className = 'slot-time';
@@ -314,12 +303,13 @@ const Agenda = (function initAgenda() {
       dot.setAttribute('aria-hidden', 'true');
 
       btn.append(time, dot);
+      const statusLabel = taken ? 'reservado' : (past ? 'ya pasó' : 'disponible');
       btn.setAttribute(
         'aria-label',
-        `${String(hour).padStart(2, '0')}:00, ${taken ? 'reservado' : 'disponible'}`
+        `${String(hour).padStart(2, '0')}:00, ${statusLabel}`
       );
 
-      if (!taken) {
+      if (!disabled) {
         btn.addEventListener('click', () => {
           selectedHour = hour;
           renderSlots();
