@@ -104,27 +104,39 @@ const Agenda = (function initAgenda() {
   if (!dayTabsEl || !slotGridEl || !form) return null;
 
   /* ---------------------------------------------------------
-     CONEXIÓN CON SUPABASE (base de datos real vía API REST)
+     CONEXIÓN CON FIREBASE (Firestore, base de datos real vía SDK)
      ---------------------------------------------------------
-     1. Creá una cuenta gratis en https://supabase.com
-     2. Creá un proyecto y corré el SQL que te dejamos en el chat
-        para crear la tabla "reservations" y la vista "taken_slots".
-     3. En el proyecto: Settings > API > copiá "Project URL" y
-        la clave "anon public".
-     4. Pegalas acá abajo. Es seguro exponer la clave "anon" en el
-        frontend: los permisos reales los controla Supabase (RLS).
+     1. Andá a https://console.firebase.google.com y creá un proyecto
+        gratis (plan "Spark").
+     2. Dentro del proyecto: "Compilación" > "Firestore Database" >
+        "Crear base de datos" (modo producción, la región no importa
+        demasiado para este caso, ej. "nam5" o "southamerica-east1").
+     3. Aplicá las reglas de seguridad que te dejamos en el chat
+        (archivo firestore.rules) desde la pestaña "Reglas".
+     4. Andá a "Configuración del proyecto" (ícono de tuerca) >
+        en "Tus apps" agregá una app Web (ícono </>) y copiá el
+        objeto firebaseConfig que te muestra.
+     5. Pegalo acá abajo, reemplazando los valores de ejemplo.
      --------------------------------------------------------- */
-  const SUPABASE_URL = 'https://xccuoyivkjtkrxdykzkv.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_C10xnQcsL9lMpjgAfvsdEg__6qEd0VU';
-
-  const SUPABASE_HEADERS = {
-    apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    'Content-Type': 'application/json',
+  const firebaseConfig = {
+    apiKey: 'AIzaSyANhsUB1pQA1xJ7Hgswm0SCPGCXYej3NAI',
+    authDomain: 'elturco-92488.firebaseapp.com',
+    projectId: 'elturco-92488',
+    storageBucket: 'elturco-92488.firebasestorage.app',
+    messagingSenderId: '909805366642',
+    appId: '1:909805366642:web:7ee9d528fde389fea581eb',
   };
 
-  const isSupabaseConfigured = () =>
-    !SUPABASE_URL.includes('TU-PROYECTO') && !SUPABASE_ANON_KEY.includes('TU-CLAVE');
+  const isFirebaseConfigured = () =>
+    typeof window.firebase !== 'undefined' &&
+    !firebaseConfig.apiKey.startsWith('TU_') &&
+    !firebaseConfig.projectId.startsWith('TU-PROYECTO');
+
+  let db = null;
+  if (isFirebaseConfigured()) {
+    window.firebase.initializeApp(firebaseConfig);
+    db = window.firebase.firestore();
+  }
 
   // Horarios de juego disponibles (24h). Editable por el negocio.
   const HOURS = [16, 17, 18, 19, 20, 21, 22, 23];
@@ -135,7 +147,7 @@ const Agenda = (function initAgenda() {
     weekday: 'long', day: 'numeric', month: 'long',
   });
 
-  // Estado en memoria, se llena con datos reales traídos de Supabase
+  // Estado en memoria, se llena con datos reales traídos de Firestore
   // (ver loadReservedSlots). No se inventa disponibilidad.
   let selectedDateKey = null;
   let selectedHour = null;
@@ -158,16 +170,17 @@ const Agenda = (function initAgenda() {
     reservedByDate.get(dKey).add(hour);
   }
 
-  // Trae de Supabase todos los horarios ya ocupados dentro del rango de
+  // Trae de Firestore todos los horarios ya ocupados dentro del rango de
   // días que se muestra en el tablero (hoy .. hoy + DAYS_AHEAD).
-  // Sólo lee "date_key" y "hour" (vista pública "taken_slots"), nunca
-  // nombres ni teléfonos de otros clientes.
+  // Sólo lee la colección "takenSlots" (día + hora), nunca nombres ni
+  // teléfonos de otros clientes: esos quedan sólo en "reservations",
+  // que las reglas de seguridad bloquean para lectura pública.
   async function loadReservedSlots() {
     reservedByDate.clear();
-    if (!isSupabaseConfigured()) {
+    if (!isFirebaseConfigured()) {
       console.warn(
-        'Supabase no está configurado todavía: completá SUPABASE_URL y ' +
-        'SUPABASE_ANON_KEY en script.js para que la disponibilidad sea real.'
+        'Firebase no está configurado todavía: completá firebaseConfig ' +
+        'en script.js para que la disponibilidad sea real.'
       );
       return;
     }
@@ -177,49 +190,57 @@ const Agenda = (function initAgenda() {
     const last = new Date(today);
     last.setDate(today.getDate() + DAYS_AHEAD - 1);
 
-    const url =
-      `${SUPABASE_URL}/rest/v1/taken_slots` +
-      `?date_key=gte.${dateKey(today)}&date_key=lte.${dateKey(last)}` +
-      `&select=date_key,hour`;
+    const snapshot = await db.collection('takenSlots')
+      .where('dateKey', '>=', dateKey(today))
+      .where('dateKey', '<=', dateKey(last))
+      .get();
 
-    const response = await fetch(url, { headers: SUPABASE_HEADERS });
-    if (!response.ok) {
-      throw new Error(`No se pudo consultar la disponibilidad (${response.status})`);
-    }
-    const rows = await response.json();
-    rows.forEach((row) => markReserved(row.date_key, row.hour));
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      markReserved(data.dateKey, data.hour);
+    });
   }
 
-  // Inserta la reserva en Supabase. Si alguien más reservó el mismo
-  // día/hora un segundo antes, la restricción UNIQUE de la base de datos
-  // rechaza el insert (409) y avisamos al usuario en vez de duplicar el turno.
+  // Guarda la reserva en Firestore usando una transacción: primero
+  // revisa si el horario ya tiene un documento en "takenSlots" y, si
+  // no existe, crea a la vez el registro de disponibilidad y la
+  // reserva completa. Si otra persona reservó ese mismo horario un
+  // instante antes, la transacción falla y avisamos en vez de duplicar.
   async function persistReservation({ dateKeyValue, hour, name, phone, players }) {
-    if (!isSupabaseConfigured()) {
+    if (!isFirebaseConfigured()) {
       // Sin backend configurado: seguimos funcionando en modo demo local
       // para no romper la página, pero avisamos por consola.
-      console.warn('Reserva NO guardada en un backend real: falta configurar Supabase.');
+      console.warn('Reserva NO guardada en un backend real: falta configurar Firebase.');
       return { ok: true, conflict: false };
     }
 
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/reservations`, {
-      method: 'POST',
-      headers: { ...SUPABASE_HEADERS, Prefer: 'return=minimal' },
-      body: JSON.stringify([{
-        date_key: dateKeyValue,
-        hour,
-        name,
-        phone,
-        players: Number(players),
-      }]),
-    });
+    const slotId = `${dateKeyValue}_${hour}`;
+    const takenRef = db.collection('takenSlots').doc(slotId);
+    const reservationRef = db.collection('reservations').doc();
 
-    if (response.status === 409) {
-      return { ok: false, conflict: true };
+    try {
+      await db.runTransaction(async (tx) => {
+        const takenDoc = await tx.get(takenRef);
+        if (takenDoc.exists) {
+          throw new Error('CONFLICT');
+        }
+        tx.set(takenRef, { dateKey: dateKeyValue, hour });
+        tx.set(reservationRef, {
+          dateKey: dateKeyValue,
+          hour,
+          name,
+          phone,
+          players: Number(players),
+          createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+        });
+      });
+    } catch (error) {
+      if (error.message === 'CONFLICT') {
+        return { ok: false, conflict: true };
+      }
+      throw error;
     }
-    if (!response.ok) {
-      const detail = await response.text();
-      throw new Error(`No se pudo guardar la reserva (${response.status}): ${detail}`);
-    }
+
     return { ok: true, conflict: false };
   }
 
