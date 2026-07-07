@@ -14,7 +14,7 @@
    https://dashboard.emailjs.com
    --------------------------------------------------------- */
 const EMAILJS_PUBLIC_KEY = 'iEk9UF15MzakJwDQ2';
-const EMAILJS_SERVICE_ID = 'service_uwz4hxs';
+const EMAILJS_SERVICE_ID = 'service_56p4zwe';
 const EMAILJS_CONTACT_TEMPLATE_ID = 'template_firq6xs';
 
 const isEmailjsConfigured = () =>
