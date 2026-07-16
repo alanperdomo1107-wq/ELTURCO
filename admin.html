@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de administración — El Turco</title>
+  <title>Panel de administración — [Nombre de tu Cancha]</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="admin-body">
 
   <header class="admin-header">
-    <h1 class="admin-title">El Turco <span>· Panel de administración</span></h1>
+    <h1 class="admin-title">[Nombre de tu Cancha] <span>· Panel de administración</span></h1>
     <button type="button" id="logoutBtn" class="btn btn-outline" hidden>Cerrar sesión</button>
   </header>
 
   <main class="admin-main">
 
+    <!-- ----- Login ----- -->
     <section id="loginSection" class="admin-card">
       <h2>Iniciar sesión</h2>
       <p class="admin-hint">Ingresá con el usuario admin que creaste en Firebase Authentication.</p>
@@ -33,6 +34,7 @@
       </form>
     </section>
 
+    <!-- ----- Dashboard (oculto hasta loguearse) ----- -->
     <section id="dashboardSection" class="admin-card" hidden>
       <div class="admin-toolbar">
         <h2>Reservas</h2>
@@ -58,6 +60,7 @@
             </tr>
           </thead>
           <tbody id="reservationsBody">
+            <!-- filas generadas por admin.js -->
           </tbody>
         </table>
       </div>

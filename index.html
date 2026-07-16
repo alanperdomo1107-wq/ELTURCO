@@ -3,33 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>El Turco · Cancha de Fútbol 5 | Reservá tu turno online</title>
-  <meta name="description" content="El Turco: cancha de fútbol 5 con césped sintético premium e iluminación LED nocturna. Reservá tu cancha online eligiendo día y horario en segundos.">
+  <title>[Nombre de tu Cancha] · Reservá tu turno online</title>
+  <meta name="description" content="[Nombre de tu Cancha]: reservá tu cancha de fútbol online eligiendo día y horario en segundos.">
   <meta name="theme-color" content="#0b140f">
 
-
-  <meta property="og:title" content="El Turco · Cancha de Fútbol 5">
+  <!-- Open Graph básico -->
+  <meta property="og:title" content="[Nombre de tu Cancha]">
   <meta property="og:description" content="Reservá tu cancha de fútbol 5 online. Césped sintético premium, luz LED y vestuarios.">
   <meta property="og:type" content="website">
 
   <link rel="stylesheet" href="styles.css">
 
+  <!-- Favicon simple en línea (pelota estilizada), sin dependencias externas -->
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%230b140f' stroke='%23f4b942' stroke-width='2'/%3E%3Cpath d='M16 8l5 4-2 6h-6l-2-6z' fill='%23f4b942'/%3E%3C/svg%3E">
 </head>
 <body>
 
+  <!-- Enlace de salto para accesibilidad por teclado -->
   <a class="skip-link" href="#contenido">Saltar al contenido principal</a>
 
+  <!-- ============ ENCABEZADO ============ -->
   <header class="site-header" id="header">
     <div class="container header-inner">
-      <a href="#inicio" class="brand" aria-label="El Turco, ir al inicio">
+      <a href="#inicio" class="brand" aria-label="[Nombre de tu Cancha], ir al inicio">
         <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 40 40" width="34" height="34">
             <circle cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-width="2.5"/>
             <path d="M20 9l7.5 5.6-2.9 8.9H15.4l-2.9-8.9z" fill="currentColor"/>
           </svg>
         </span>
-        <span class="brand-text">EL TURCO<span class="brand-sub">Fútbol 5</span></span>
+        <span class="brand-text">[TU CANCHA]<span class="brand-sub">Fútbol 5</span></span>
       </a>
 
       <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="primaryNav">
@@ -52,6 +55,7 @@
 
   <main id="contenido">
 
+    <!-- ============ HERO ============ -->
     <section class="hero" id="inicio" aria-label="Presentación">
       <div class="hero-glow" aria-hidden="true"></div>
       <div class="container hero-inner">
@@ -62,7 +66,7 @@
           <span class="accent-text">TU PARTIDO.</span>
         </h1>
         <p class="hero-copy">
-          Reservá tu turno en El Turco eligiendo el día y la hora que más te convengan.
+          Reservá tu turno en [tu cancha] eligiendo el día y la hora que más te convengan.
           Cancha techada, césped premium e iluminación nocturna para que el partido
           nunca se suspenda.
         </p>
@@ -88,6 +92,7 @@
       </div>
     </section>
 
+    <!-- ============ SERVICIOS ============ -->
     <section class="section" id="servicios" aria-labelledby="servicios-title">
       <div class="container">
         <p class="eyebrow">Lo que incluye tu turno</p>
@@ -145,6 +150,7 @@
       </div>
     </section>
 
+    <!-- ============ SOBRE NOSOTROS ============ -->
     <section class="section section-alt" id="nosotros" aria-labelledby="nosotros-title">
       <div class="container about-grid">
         <div class="about-visual" aria-hidden="true">
@@ -158,7 +164,7 @@
           <p class="eyebrow">Sobre nosotros</p>
           <h2 id="nosotros-title" class="section-title">Más de 10 años haciendo cancha para el barrio</h2>
           <p>
-            El Turco nació de una pasión simple: tener un lugar cerca de casa para juntar
+            [Tu cancha] nació de una pasión simple: tener un lugar cerca de casa para juntar
             a los amigos y jugar un buen partido, cualquier día de la semana. Desde
             entonces cuidamos cada detalle de la cancha para que lo único que tengas
             que pensar sea la formación del equipo.
@@ -172,6 +178,7 @@
       </div>
     </section>
 
+    <!-- ============ AGENDA / RESERVAS (elemento distintivo) ============ -->
     <section class="section section-booking" id="reservar" aria-labelledby="reservar-title">
       <div class="container">
         <p class="eyebrow">Agenda de turnos</p>
@@ -183,8 +190,10 @@
 
         <div class="scoreboard" id="scoreboard">
 
+          <!-- Tabs de día, se completan por JavaScript -->
           <div class="day-tabs" id="dayTabs" role="tablist" aria-label="Elegir día"></div>
 
+          <!-- Grilla de horarios, se completa por JavaScript -->
           <div class="slot-grid" id="slotGrid" role="group" aria-label="Horarios disponibles"></div>
 
           <p class="slot-legend">
@@ -193,6 +202,7 @@
             <span><i class="dot dot-taken" aria-hidden="true"></i> Reservado</span>
           </p>
 
+          <!-- Resumen + formulario de confirmación -->
           <form class="booking-form" id="bookingForm" novalidate>
             <div class="booking-summary" id="bookingSummary" aria-live="polite">
               <p class="booking-summary-empty" id="summaryEmpty">Todavía no elegiste un horario.</p>
@@ -232,6 +242,7 @@
       </div>
     </section>
 
+    <!-- ============ CONTACTO ============ -->
     <section class="section" id="contacto" aria-labelledby="contacto-title">
       <div class="container contact-grid">
         <div class="contact-info">
@@ -290,10 +301,11 @@
     </section>
   </main>
 
+  <!-- ============ PIE DE PÁGINA ============ -->
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-brand">
-        <span class="brand-text">EL TURCO<span class="brand-sub">Fútbol 5</span></span>
+        <span class="brand-text">[TU CANCHA]<span class="brand-sub">Fútbol 5</span></span>
         <p>Tu cancha de fútbol 5 de confianza, todos los días del año.</p>
       </div>
 
@@ -306,16 +318,16 @@
       </nav>
 
       <div class="footer-social" aria-label="Redes sociales">
-        <a href="#" aria-label="Instagram de El Turco">
+        <a href="#" aria-label="Instagram de [tu cancha]">
           <svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
         </a>
-        <a href="#" aria-label="Facebook de El Turco">
+        <a href="#" aria-label="Facebook de [tu cancha]">
           <svg viewBox="0 0 24 24" width="20" height="20"><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v3H7v4h3v6h4v-6h3l1-4h-4V8a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
         </a>
       </div>
     </div>
     <div class="container footer-bottom">
-      <p>&copy; <span id="year"></span> El Turco · Cancha de Fútbol 5. Todos los derechos reservados.</p>
+      <p>&copy; <span id="year"></span> [Nombre de tu Cancha]. Todos los derechos reservados.</p>
     </div>
   </footer>
 
